@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#244f40">
+  <meta name="description" content="Capture notes, tasks, and ideas in your private GitHub repository.">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self' https://api.github.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/192.png" type="image/png">
+  <link rel="apple-touch-icon" href="./icons/192.png">
+  <link rel="stylesheet" href="./styles.css">
+  <title>Repo Notes</title>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar"><a class="brand" href="./"><img src="./icons/192.png" alt="" width="34" height="34"><span>Repo Notes</span></a><button id="settings-open" class="text-button" type="button">Settings</button></header>
+    <main>
+      <div id="install-card" class="install-card"><div><strong>Your inbox, one tap away.</strong><p>Add Repo Notes to your phone.</p></div><button id="install" class="small-button" type="button">Install</button></div>
+      <div class="heading"><p class="eyebrow">Less filing. More thinking.</p><h1>Keep the thought.</h1><p class="subtitle">Notes, tasks, ideas. Straight to your repo.</p></div>
+      <form id="capture-form">
+        <fieldset id="capture-fields" disabled>
+          <legend class="sr-only">Quick capture</legend>
+          <div class="tabs" role="group" aria-label="Capture type">
+            <label><input type="radio" name="kind" value="note" checked>Note</label>
+            <label><input type="radio" name="kind" value="task">Task</label>
+            <label><input type="radio" name="kind" value="idea">Idea</label>
+          </div>
+          <label for="thought" class="sr-only">Your thought</label>
+          <textarea id="thought" maxlength="50000" placeholder="What do you want to remember?"></textarea>
+          <details id="source-details" class="source-details"><summary><span id="source-summary">Add a link or video time</span><span aria-hidden="true">＋</span></summary>
+            <div class="source-fields">
+              <label class="check"><input id="include-source" type="checkbox" checked>Include source &amp; shared text</label>
+              <label class="field" for="source-url">Link</label><input id="source-url" type="text" inputmode="url" autocomplete="off" placeholder="https://…" maxlength="10000">
+              <label class="field" for="source-title">Page title</label><input id="source-title" type="text" placeholder="Optional" maxlength="250">
+              <label class="field" for="video-time">Video time</label><input id="video-time" type="text" inputmode="text" placeholder="Optional, e.g. 12:34" maxlength="20">
+              <blockquote id="shared-text" hidden></blockquote>
+            </div>
+          </details>
+        </fieldset>
+        <button id="save" type="submit" class="primary" disabled>Save to GitHub <span aria-hidden="true">↗</span></button>
+        <p id="save-hint" class="hint center">Your draft stays on this phone until you save.</p>
+      </form>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+      <a id="saved-link" class="saved-link" target="_blank" rel="noopener noreferrer" hidden>Open saved note ↗</a>
+      <section id="pending-card" class="pending-card" hidden><div><strong id="pending-count"></strong><p>Kept on this phone until GitHub confirms.</p></div><button id="retry" type="button" class="small-button">Retry</button></section>
+      <div class="local-links"><button id="drafts-open" class="text-button" type="button">Drafts <span id="draft-count">0</span></button><button id="waiting-open" class="text-button" type="button">Waiting <span id="waiting-count">0</span></button></div>
+      <footer><span id="connection">Connect your private repository</span><span id="online">Markdown, yours.</span></footer>
+    </main>
+  </div>
+
+  <dialog id="settings-dialog" class="sheet"><div class="dialog-inner">
+    <div class="dialog-header"><h2>Your notes. Your repo.</h2><button type="button" class="close-button" data-close="settings-dialog" aria-label="Close settings">×</button></div>
+    <p class="subtitle">Connect your private GitHub repository once.</p>
+    <form id="settings-form">
+      <label class="field" for="repository">Repository</label><input id="repository" type="text" required placeholder="your-name/notes" autocomplete="off" autocapitalize="none" spellcheck="false">
+      <label class="field" for="token">GitHub access token</label><input id="token" type="password" required placeholder="github_pat_…" autocomplete="off" autocapitalize="none" spellcheck="false">
+      <p class="hint">Use a fine-grained token for this repo with <strong>Contents: Read and write</strong>. The token stays in this browser's local storage, which is not encrypted.</p>
+      <label class="field" for="folder">Save inside</label><input id="folder" type="text" required value="inbox" autocomplete="off" autocapitalize="none" spellcheck="false">
+      <p class="hint">Captures are filed by date automatically.</p>
+      <button id="connect" class="primary" type="submit">Connect private repository</button>
+    </form>
+    <p id="settings-status" class="status" role="status" aria-live="polite"></p>
+    <button id="disconnect" type="button" class="secondary" hidden>Disconnect &amp; remove token</button>
+    <button id="backup" type="button" class="text-button backup">Download drafts &amp; waiting captures</button>
+    <p class="hint">Notes are sent directly to GitHub. The website host receives no token or note content from this app. Clearing site data removes local drafts and waiting captures.</p>
+  </div></dialog>
+  <dialog id="local-dialog" class="sheet"><div class="dialog-inner"><div class="dialog-header"><h2 id="local-heading">On this phone</h2><button type="button" class="close-button" data-close="local-dialog" aria-label="Close list">×</button></div><div id="local-list"></div></div></dialog>
+  <dialog id="install-help" class="sheet"><div class="dialog-inner"><div class="dialog-header"><h2>Add to your phone</h2><button type="button" class="close-button" data-close="install-help" aria-label="Close installation instructions">×</button></div><ol class="install-steps"><li>Open this app's HTTPS address in Chrome on Android.</li><li>Open Chrome's <strong>⋮ menu → Add to home screen → Install</strong>.</li><li>Open Repo Notes once, then share a link from Chrome or YouTube and choose <strong>Repo Notes</strong>.</li></ol><p class="hint">A bookmark shortcut alone may not appear in the Share menu. Choose Install when Chrome offers it.</p></div></dialog>
+  <noscript>Repo Notes needs JavaScript enabled to save captures on your phone and to GitHub.</noscript>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
